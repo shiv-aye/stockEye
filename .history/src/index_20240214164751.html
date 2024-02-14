@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Summary</title>
+    <!-- Include Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Include custom CSS -->
+    <link rel="stylesheet" href="./styles.css">
+    <!-- Google Fonts - Open Sans for body text and Montserrat for headings -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center mt-5">Strategy Summary</h1>
+
+        <!-- Dropdown for selecting stock symbol -->
+        <div class="input-group mt-4">
+            <select class="form-select" id="stock-select">
+                <option value="^NSEI">Nifty 50 (^NSEI)</option>
+                <option value="TCS">Tata Consultancy Services (TCS)</option>
+                <option value="AAPL">Apple Inc. (AAPL)</option>
+            </select>
+            <button class="btn btn-primary" type="button" id="search-btn">Search</button>
+        </div>
+
+        <!-- Container for table -->
+        <div id="table-container" class="mt-4"></div>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+
+    <!-- Include Bootstrap 5 JavaScript -->
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Include DataTables JavaScript -->
+    <script type="text/javascript" src="../node_modules/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="../node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load strategy summary for default stock symbol
+            await loadStrategySummary();
+
+            // Search button click event listener
+            document.getElementById('search-btn').addEventListener('click', async () => {
+                const symbol = document.getElementById('stock-select').value;
+                await loadStrategySummary(symbol);
+            });
+        });
+
+        // Function to load and display strategy summary for a given stock symbol
+        async function loadStrategySummary(symbol = '^NSEI') {
+            try {
+                const response = await fetch(`/strategy-summary?symbol=${symbol}`);
+                const data = await response.json();
+                if (response.ok) {
+                    displayDataTable(data);
+                } else {
+                    console.error('Error fetching strategy summary:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching strategy summary:', error);
+            }
+        }
+
+       // Function to display DataTable for the given stock data
+function displayDataTable(data) {
+    const tableContainer = document.getElementById('table-container');
+    tableContainer.innerHTML = ''; // Clear previous table, if any
+
+    if (!data || !data.data || !Array.isArray(data.data)) {
+        console.error('Invalid data format:', data);
+        return;
+    }
+
+    // Create table element
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-bordered', 'table-hover');
+
+    // Create table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    ['Date', 'Closing Price', '% Change (Day)', '% Change (Week)'].forEach(column => {
+        const th = document.createElement('th');
+        th.textContent = column;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    const tbody = document.createElement('tbody');
+    data.data.forEach(item => {
+        const row = document.createElement('tr');
+        ['date', 'closingPrice', 'percentChangeDay', 'percentChangeWeek'].forEach(property => {
+            const cell = document.createElement('td');
+            cell.textContent = item[property];
+            row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    // Append table to container
+    tableContainer.appendChild(table);
+
+    // Initialize DataTable
+    $(document).ready(function () {
+        $(table).DataTable();
+    });
+}
+
+
+        const tableContainer = document.getElementById('table-container');
+        tableContainer.innerHTML = ''; // Clear previous table, if any
+
+        // Create table element
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-bordered', 'table-hover');
+
+        // Create table header
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        ['Date', 'Closing Price', '% Change (Day)', '% Change (Week)'].forEach(column => {
+            const th = document.createElement('th');
+            th.textContent = column;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+    </script>
+</body>
+
+</html>
